@@ -10,8 +10,8 @@ public class NetcodeRegister : MonoBehaviour
 
     public void RegisterNetworkPrefabs()
     {
-        var path = Path.Join(Application.dataPath, "Prefab/Netcode.prefab");
-        var lines = File.ReadAllLines(path);
+        var netcodePrefabPath = Path.Join(Application.dataPath, "Prefab/Netcode.prefab");
+        var lines = File.ReadAllLines(netcodePrefabPath);
 
         var builder = new StringBuilder();
 
@@ -34,7 +34,9 @@ public class NetcodeRegister : MonoBehaviour
                 builder.Append(spaces);
                 builder.AppendLine("- Override: 0");
                 builder.Append(spaces);
-                builder.AppendLine("  Prefab: {fileID: @@FILEID@@, guid: @@GUID@@, type: 3}");
+                builder.AppendLine("  Prefab: {fileID: @@FILEID@@, guid: @@GUID@@, type: 3}"
+                    .Replace("@@FILEID@@", fileId.ToString())
+                    .Replace("@@GUID@@", guid));
                 builder.Append(spaces);
                 builder.AppendLine("  SourcePrefabToOverride: {fileID: 0}");
                 builder.Append(spaces);
@@ -50,5 +52,7 @@ public class NetcodeRegister : MonoBehaviour
         while (pos < lines.Length) builder.AppendLine(lines[pos++]);
 
         Debug.Log(builder);
+
+        File.WriteAllText(netcodePrefabPath, builder.ToString());
     }
 }
