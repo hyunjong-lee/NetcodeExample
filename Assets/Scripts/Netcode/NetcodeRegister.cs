@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using Unity.Netcode;
 using UnityEditor;
 using UnityEngine;
 
@@ -28,7 +29,9 @@ public class NetcodeRegister : MonoBehaviour
         foreach (var prefabPath in Directory.EnumerateFiles(searchPath, "*.prefab", SearchOption.AllDirectories))
         {
             var assetPath = Path.Join("Assets", prefabPath.Replace(Application.dataPath, ""));
-            var obj = AssetDatabase.LoadAllAssetsAtPath(assetPath).First(e => e.GetType() == typeof(GameObject));
+            GameObject obj = AssetDatabase.LoadAllAssetsAtPath(assetPath).First(e => e.GetType() == typeof(GameObject)) as GameObject;
+            if (obj == null || obj.GetComponent<NetworkObject>() == null)
+                continue;
             if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guid, out long fileId))
             {
                 builder.Append(spaces);
