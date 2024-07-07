@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using Unity.Netcode;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,19 +17,21 @@ public class NetcodeRegister : MonoBehaviour
         var builder = new StringBuilder();
 
         var pos = 0;
-        while (!lines[pos].Trim().StartsWith("NetworkPrefabs"))
+        while (!lines[pos].Trim().StartsWith("List"))
         {
             builder.AppendLine(lines[pos]);
             pos++;
         }
 
-        var spaces = lines[pos].Substring(0, lines[pos].IndexOf('N'));
-        builder.AppendLine(string.Concat($"{spaces}NetworkPrefabs:"));
+        var spaces = lines[pos].Substring(0, lines[pos].IndexOf('L'));
+        builder.AppendLine(string.Concat($"{spaces}List:"));
         var searchPath = Path.Join(Application.dataPath, RootPath);
         foreach (var prefabPath in Directory.EnumerateFiles(searchPath, "*.prefab", SearchOption.AllDirectories))
         {
             var assetPath = Path.Join("Assets", prefabPath.Replace(Application.dataPath, ""));
-            var obj = AssetDatabase.LoadAllAssetsAtPath(assetPath).First(e => e.GetType() == typeof(GameObject));
+            GameObject obj = AssetDatabase.LoadAllAssetsAtPath(assetPath).First(e => e.GetType() == typeof(GameObject)) as GameObject;
+            if (obj == null || obj.GetComponent<NetworkObject>() == null)
+                continue;
             if (AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out var guid, out long fileId))
             {
                 builder.Append(spaces);
